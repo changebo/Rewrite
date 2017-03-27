@@ -37,12 +37,12 @@ def generate_font_bitmaps(chars, font_path, char_size, canvas_size, x_offset, y_
     return np.array(bitmaps)
 
 
-def process_font(chars, font_path, save_dir, x_offset=0, y_offset=0, mode='target'):
-    char_size = 64
-    canvas = 80
+def process_font(chars, font_path, save_dir, x_offset=0, y_offset=0, mode='target', char_size=64, canvas=80):
+    # char_size = 64
+    # canvas = 80
     if mode == 'source':
-        char_size *= 2
-        canvas *= 2
+        char_size = char_size * 2
+        canvas = canvas * 2
     font_bitmaps = generate_font_bitmaps(chars, font_path, char_size,
                                          canvas, x_offset, y_offset)
     _, ext = os.path.splitext(font_path)
@@ -88,6 +88,10 @@ if __name__ == "__main__":
                         help='target font x offset')
     parser.add_argument('--ty', type=int, default=0,
                         help='target font y offset')
+    parser.add_argument('--char_size', type=int, default=64,
+                        help='char_size. Default = 64')
+    parser.add_argument('--canvas', type=int, default=80,
+                        help='canvas. Default = 80')
     FLAGS = parser.parse_args()
 
     if not os.path.exists(FLAGS.save_dir):
@@ -95,6 +99,8 @@ if __name__ == "__main__":
 
     chars = get_chars_set(FLAGS.char_list)
     if FLAGS.source_font:
-        process_font(chars, FLAGS.source_font, FLAGS.save_dir, FLAGS.sx, FLAGS.sy, mode='source')
+        process_font(chars, FLAGS.source_font, FLAGS.save_dir, FLAGS.sx, FLAGS.sy, 
+            mode='source', char_size=FLAGS.char_size, canvas=FLAGS.canvas)
     if FLAGS.target_font:
-        process_font(chars, FLAGS.target_font, FLAGS.save_dir, FLAGS.tx, FLAGS.ty, mode='target')
+        process_font(chars, FLAGS.target_font, FLAGS.save_dir, FLAGS.tx, FLAGS.ty, 
+            mode='target', char_size=FLAGS.char_size, canvas=FLAGS.canvas)
