@@ -18,7 +18,7 @@ class FontDataProvider(object):
         self.length = self.end - self.start
 
     def get_data(self):
-        return self.data
+        return self.data.astype(np.float32)
 
     def next_batch(self, batch_size):
         if self.cursor >= self.length:
@@ -56,3 +56,6 @@ class FontDataManager(object):
     def get_validation(self):
         return self.validation_source.get_data(), \
                self.validation_target.get_data()
+
+    def get_train(self):
+        return self.train_source.get_data(), self.train_target.get_data()        
