@@ -19,11 +19,11 @@ def leaky_relu(x, alpha=0.2):
     # TODO: is this memory efficient?
     return tf.maximum(x, x * alpha)
 
-def cnn_model_fn(features, targets, mode):
+def cnn_model_fn(features, targets, mode, params):
     # Input Layer
     input_layer = tf.reshape(features, [-1, 80, 80, 1])
 
-    k1=32
+    k1=5
     # Convolutional Layer #1
     conv1 = tf.layers.conv2d(
         inputs=input_layer,
@@ -41,7 +41,9 @@ def cnn_model_fn(features, targets, mode):
 
     pool1 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
 
-    output = tf.reshape(pool1, [-1, 40, 40])
+    dropout = tf.layers.dropout(inputs=pool1, rate=params["dropout_rate"], training=mode == learn.ModeKeys.TRAIN)
+
+    output = tf.sigmoid(tf.reshape(dropout, [-1, 40, 40]))
 
     loss = tf.reduce_mean(tf.abs(output - targets))
 
@@ -76,7 +78,8 @@ def main(unused_argv):
     # print(train_y.shape)
 
     # Create the Estimator
-    model = learn.Estimator(model_fn=cnn_model_fn)    
+    model_params = {"dropout_rate": 1-train_keep_prob}
+    model = learn.Estimator(model_fn=cnn_model_fn, params=model_params)    
 
     # Set up logging for predictions
     # Log the values in the "Softmax" tensor with label "probabilities"
