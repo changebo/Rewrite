@@ -1,12 +1,10 @@
-# import os
+import os
 # import shutil
 import argparse
 # import glob
-# import tensorflow as tf
-# import numpy as np
 # import imageio
 from dataset import read_font_data, FontDataManager
-# from utils import render_fonts_image
+from utils import render_fonts_image
 
 import numpy as np
 import tensorflow as tf
@@ -23,28 +21,78 @@ def cnn_model_fn(features, targets, mode, params):
     # Input Layer
     input_layer = tf.reshape(features, [-1, 80, 80, 1])
 
-    k1=5
-    # Convolutional Layer #1
-    conv1 = tf.layers.conv2d(
+    conv1_64_64 = tf.layers.conv2d(
         inputs=input_layer,
         filters=8,
-        kernel_size=k1,
+        kernel_size=[64,64],
+        padding="same",
+        activation=leaky_relu)
+    conv2_64_64 = tf.layers.conv2d(
+        inputs=conv1_64_64,
+        filters=8,
+        kernel_size=[64,64],
+        padding="same",
+        activation=leaky_relu)
+        
+    conv1_32_32 = tf.layers.conv2d(
+        inputs=conv2_64_64,
+        filters=32,
+        kernel_size=[32,32],
+        padding="same",
+        activation=leaky_relu)
+    
+    conv2_32_32 = tf.layers.conv2d(
+        inputs=conv1_32_32,
+        filters=32,
+        kernel_size=[32,32],
+        padding="same",
+        activation=leaky_relu)
+        
+    conv1_16_16 = tf.layers.conv2d(
+        inputs=conv2_32_32,
+        filters=64,
+        kernel_size=[16,16],
+        padding="same",
+        activation=leaky_relu)
+    
+    conv2_16_16 = tf.layers.conv2d(
+        inputs=conv1_16_16,
+        filters=64,
+        kernel_size=[16,16],
+        padding="same",
+        activation=leaky_relu)
+        
+    conv1_7_7 = tf.layers.conv2d(
+        inputs=conv2_16_16,
+        filters=128,
+        kernel_size=[7,7],
+        padding="same",
+        activation=leaky_relu)
+    
+    conv2_7_7 = tf.layers.conv2d(
+        inputs=conv1_7_7,
+        filters=128,
+        kernel_size=[7,7],
+        padding="same",
+        activation=leaky_relu)
+    
+    conv1_3_3 = tf.layers.conv2d(
+        inputs=conv2_7_7,
+        filters=128,
+        kernel_size=[3,3],
         padding="same",
         activation=leaky_relu)
 
-    conv2 = tf.layers.conv2d(
-        inputs=conv1,
+    conv2_3_3 = tf.layers.conv2d(
+        inputs=conv1_3_3,
         filters=1,
-        kernel_size=k1,
+        kernel_size=[3,3],
         padding="same",
         activation=leaky_relu)    
 
-    pool1 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
-
+    pool1 = tf.layers.max_pooling2d(inputs=conv2_3_3, pool_size=[2, 2], strides=2)
     dropout = tf.layers.dropout(inputs=pool1, rate=params["dropout_rate"], training=mode == learn.ModeKeys.TRAIN)
-
     output = tf.sigmoid(tf.reshape(dropout, [-1, 40, 40]))
-
     loss = tf.reduce_mean(tf.abs(output - targets))
 
     train_op = tf.contrib.layers.optimize_loss(
@@ -53,7 +101,7 @@ def cnn_model_fn(features, targets, mode, params):
         learning_rate=0.001,
         optimizer="Adam")
 
-    predictions = {"image": tf.identity(output, name="foo"), "loss": tf.identity(loss, name="loss")}
+    predictions = {"image": output, "loss": tf.identity(loss, name="loss")}
 
     return model_fn_lib.ModelFnOps(mode=mode, predictions=predictions, loss=loss, train_op=train_op)
 
@@ -95,15 +143,19 @@ def main(unused_argv):
         steps=num_iter,
         monitors=[logging_hook])
 
-    metrics = {
-      "accuracy":
-          learn.MetricSpec(
-              metric_fn=tf.metrics.mean_absolute_error, prediction_key="image"),
-    }
+    # metrics = {
+    #   "accuracy":
+    #       learn.MetricSpec(
+    #           metric_fn=tf.metrics.mean_absolute_error, prediction_key="image"),
+    # }
     
-    eval_results = model.evaluate(x=validation_x, y=validation_y, metrics=metrics)
-    
-    print(eval_results)
+    # eval_results = model.evaluate(x=validation_x, y=validation_y, metrics=metrics)
+    # print(eval_results)
+
+    predictions = model.predict(x=validation_x, outputs="image")
+    images = np.array(map(lambda x: x["image"], list(predictions)))
+    render_fonts_image(images, os.path.join(frame_dir, "test.png"), 10)
+
 
 
 if __name__ == '__main__':
