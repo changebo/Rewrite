@@ -1,7 +1,3 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 # import os
 # import shutil
 import argparse
@@ -27,16 +23,24 @@ def cnn_model_fn(features, targets, mode):
     # Input Layer
     input_layer = tf.reshape(features, [-1, 80, 80, 1])
 
+    k1=32
     # Convolutional Layer #1
-    conv1_64_64 = tf.layers.conv2d(
+    conv1 = tf.layers.conv2d(
         inputs=input_layer,
-        filters=1,
-        kernel_size=64,
+        filters=8,
+        kernel_size=k1,
         padding="same",
         activation=leaky_relu)
-        # activation=tf.nn.relu)
 
-    pool1 = tf.layers.max_pooling2d(inputs=conv1_64_64, pool_size=[2, 2], strides=2)
+    conv2 = tf.layers.conv2d(
+        inputs=conv1,
+        filters=1,
+        kernel_size=k1,
+        padding="same",
+        activation=leaky_relu)    
+
+    pool1 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
+
     output = tf.reshape(pool1, [-1, 40, 40])
 
     loss = tf.reduce_mean(tf.abs(output - targets))
@@ -45,9 +49,9 @@ def cnn_model_fn(features, targets, mode):
         loss=loss,
         global_step=tf.contrib.framework.get_global_step(),
         learning_rate=0.001,
-        optimizer="SGD")
+        optimizer="Adam")
 
-    predictions = {"image": tf.identity(output, name="foo")}
+    predictions = {"image": tf.identity(output, name="foo"), "loss": tf.identity(loss, name="loss")}
 
     return model_fn_lib.ModelFnOps(mode=mode, predictions=predictions, loss=loss, train_op=train_op)
 
@@ -76,7 +80,7 @@ def main(unused_argv):
 
     # Set up logging for predictions
     # Log the values in the "Softmax" tensor with label "probabilities"
-    tensors_to_log = {"image":"foo"}
+    tensors_to_log = {"loss": "loss"}
     logging_hook = tf.train.LoggingTensorHook(
         tensors=tensors_to_log, every_n_iter=100)
 
@@ -85,7 +89,7 @@ def main(unused_argv):
         x=train_x,
         y=train_y,
         batch_size=20,
-        steps=400,
+        steps=num_iter,
         monitors=[logging_hook])
 
     metrics = {
