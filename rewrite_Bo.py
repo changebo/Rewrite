@@ -27,7 +27,7 @@ def cnn_model_fn(features, targets, mode):
     conv1_64_64 = tf.layers.conv2d(
         inputs=input_layer,
         filters=1,
-        kernel_size=5,
+        kernel_size=64,
         padding="same",
         activation=leaky_relu)
         # activation=tf.nn.relu)
@@ -68,7 +68,7 @@ def main(unused_argv):
     # print(train_y.shape)
 
     # Create the Estimator
-    model = learn.Estimator(model_fn=cnn_model_fn, model_dir="/tmp/font_convnet_model")
+    model = learn.Estimator(model_fn=cnn_model_fn)    
 
     # Set up logging for predictions
     # Log the values in the "Softmax" tensor with label "probabilities"
