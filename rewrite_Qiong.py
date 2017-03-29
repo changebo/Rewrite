@@ -19,7 +19,7 @@ def leaky_relu(x, alpha=0.2):
     # TODO: is this memory efficient?
     return tf.maximum(x, x * alpha)
 
-def cnn_model_fn(features, targets, mode):
+def cnn_model_fn(features, targets, mode, params):
     # Input Layer
     input_layer = tf.reshape(features, [-1, 80, 80,1])
 
@@ -129,6 +129,7 @@ def main(unused_argv):
     # print(train_y.shape)
 
     # Create the Estimator
+    model_params = {"dropout_rate": 1-train_keep_prob}
     #model = learn.Estimator(model_fn=cnn_model_fn, model_dir="/tmp/font_convnet_model")
     model = learn.Estimator(model_fn=cnn_model_fn)
 
