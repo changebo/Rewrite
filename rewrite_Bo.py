@@ -21,28 +21,78 @@ def cnn_model_fn(features, targets, mode, params):
     # Input Layer
     input_layer = tf.reshape(features, [-1, 80, 80, 1])
 
-    k1=5
-    # Convolutional Layer #1
-    conv1 = tf.layers.conv2d(
+    conv1_64_64 = tf.layers.conv2d(
         inputs=input_layer,
-        filters=3,
-        kernel_size=k1,
+        filters=8,
+        kernel_size=[64,64],
+        padding="same",
+        activation=leaky_relu)
+    conv2_64_64 = tf.layers.conv2d(
+        inputs=conv1_64_64,
+        filters=8,
+        kernel_size=[64,64],
+        padding="same",
+        activation=leaky_relu)
+        
+    conv1_32_32 = tf.layers.conv2d(
+        inputs=conv2_64_64,
+        filters=32,
+        kernel_size=[32,32],
+        padding="same",
+        activation=leaky_relu)
+    
+    conv2_32_32 = tf.layers.conv2d(
+        inputs=conv1_32_32,
+        filters=32,
+        kernel_size=[32,32],
+        padding="same",
+        activation=leaky_relu)
+        
+    conv1_16_16 = tf.layers.conv2d(
+        inputs=conv2_32_32,
+        filters=64,
+        kernel_size=[16,16],
+        padding="same",
+        activation=leaky_relu)
+    
+    conv2_16_16 = tf.layers.conv2d(
+        inputs=conv1_16_16,
+        filters=64,
+        kernel_size=[16,16],
+        padding="same",
+        activation=leaky_relu)
+        
+    conv1_7_7 = tf.layers.conv2d(
+        inputs=conv2_16_16,
+        filters=128,
+        kernel_size=[7,7],
+        padding="same",
+        activation=leaky_relu)
+    
+    conv2_7_7 = tf.layers.conv2d(
+        inputs=conv1_7_7,
+        filters=128,
+        kernel_size=[7,7],
+        padding="same",
+        activation=leaky_relu)
+    
+    conv1_3_3 = tf.layers.conv2d(
+        inputs=conv2_7_7,
+        filters=128,
+        kernel_size=[3,3],
         padding="same",
         activation=leaky_relu)
 
-    conv2 = tf.layers.conv2d(
-        inputs=conv1,
+    conv2_3_3 = tf.layers.conv2d(
+        inputs=conv1_3_3,
         filters=1,
-        kernel_size=k1,
+        kernel_size=[3,3],
         padding="same",
         activation=leaky_relu)    
 
-    pool1 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
-
+    pool1 = tf.layers.max_pooling2d(inputs=conv2_3_3, pool_size=[2, 2], strides=2)
     dropout = tf.layers.dropout(inputs=pool1, rate=params["dropout_rate"], training=mode == learn.ModeKeys.TRAIN)
-
     output = tf.sigmoid(tf.reshape(dropout, [-1, 40, 40]))
-
     loss = tf.reduce_mean(tf.abs(output - targets))
 
     train_op = tf.contrib.layers.optimize_loss(
