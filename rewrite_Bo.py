@@ -8,6 +8,10 @@ import argparse
 from dataset import read_font_data, FontDataManager
 # from utils import render_fonts_image
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import numpy as np
 import tensorflow as tf
 from tensorflow.contrib import learn
