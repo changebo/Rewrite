@@ -1,12 +1,10 @@
-# import os
+import os
 # import shutil
 import argparse
 # import glob
-# import tensorflow as tf
-# import numpy as np
 # import imageio
 from dataset import read_font_data, FontDataManager
-# from utils import render_fonts_image
+from utils import render_fonts_image
 
 import numpy as np
 import tensorflow as tf
@@ -27,7 +25,7 @@ def cnn_model_fn(features, targets, mode, params):
     # Convolutional Layer #1
     conv1 = tf.layers.conv2d(
         inputs=input_layer,
-        filters=8,
+        filters=3,
         kernel_size=k1,
         padding="same",
         activation=leaky_relu)
@@ -53,7 +51,7 @@ def cnn_model_fn(features, targets, mode, params):
         learning_rate=0.001,
         optimizer="Adam")
 
-    predictions = {"image": tf.identity(output, name="foo"), "loss": tf.identity(loss, name="loss")}
+    predictions = {"image": output, "loss": tf.identity(loss, name="loss")}
 
     return model_fn_lib.ModelFnOps(mode=mode, predictions=predictions, loss=loss, train_op=train_op)
 
@@ -95,15 +93,19 @@ def main(unused_argv):
         steps=num_iter,
         monitors=[logging_hook])
 
-    metrics = {
-      "accuracy":
-          learn.MetricSpec(
-              metric_fn=tf.metrics.mean_absolute_error, prediction_key="image"),
-    }
+    # metrics = {
+    #   "accuracy":
+    #       learn.MetricSpec(
+    #           metric_fn=tf.metrics.mean_absolute_error, prediction_key="image"),
+    # }
     
-    eval_results = model.evaluate(x=validation_x, y=validation_y, metrics=metrics)
-    
-    print(eval_results)
+    # eval_results = model.evaluate(x=validation_x, y=validation_y, metrics=metrics)
+    # print(eval_results)
+
+    predictions = model.predict(x=validation_x, outputs="image")
+    images = np.array(map(lambda x: x["image"], list(predictions)))
+    render_fonts_image(images, os.path.join(frame_dir, "test.png"), 10)
+
 
 
 if __name__ == '__main__':
