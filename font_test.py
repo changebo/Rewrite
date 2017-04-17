@@ -12,4 +12,4 @@ font_test = read_font_data("SentyCHALKoriginal.npy",1)
 
 char_num = font_test.shape[0]
 for i in range(char_num):
-    mplimg.imsave(str(i)+'.png',np.uint8(font_test[i,:,:]), cmap = cm.gray)
+    mplimg.imsave(str(i)+'.jpg',np.uint8(font_test[i,:,:]), cmap = cm.gray)
