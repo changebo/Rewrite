@@ -37,12 +37,13 @@ def generate_font_bitmaps(chars, font_path, char_size, canvas_size, x_offset, y_
     return np.array(bitmaps)
 
 
-def process_font(chars, font_path, save_dir, x_offset=0, y_offset=0, mode='target', char_size=64, canvas=80):
+def process_font(chars, font_path, save_dir, x_offset=0, y_offset=0, mode='target', char_size=32, canvas=40):
     # char_size = 64
     # canvas = 80
-    if mode == 'source':
-        char_size = char_size * 2
-        canvas = canvas * 2
+
+    # if mode == 'source':
+    #     char_size = char_size * 2
+    #     canvas = canvas * 2
     font_bitmaps = generate_font_bitmaps(chars, font_path, char_size,
                                          canvas, x_offset, y_offset)
     _, ext = os.path.splitext(font_path)
@@ -88,10 +89,10 @@ if __name__ == "__main__":
                         help='target font x offset')
     parser.add_argument('--ty', type=int, default=0,
                         help='target font y offset')
-    parser.add_argument('--char_size', type=int, default=64,
-                        help='char_size. Default = 64')
-    parser.add_argument('--canvas', type=int, default=80,
-                        help='canvas. Default = 80')
+    parser.add_argument('--char_size', type=int, default=32,
+                        help='char_size. Default = 32')
+    parser.add_argument('--canvas', type=int, default=40,
+                        help='canvas. Default = 40')
     FLAGS = parser.parse_args()
 
     if not os.path.exists(FLAGS.save_dir):

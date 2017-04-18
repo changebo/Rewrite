@@ -1,3 +1,7 @@
+```
+python preprocess.py --source_font fonts/simkai.ttf --target_font fonts/simhei.ttf --char_list charsets/top_3000_simplified.txt --save_dir path_to_save_bitmap
+```
+
 #Rewrite: Neural Style Transfer For Chinese Fonts
 <p align="center">
   <img src="https://github.com/kaonashi-tyc/Rewrite/blob/master/images/mixed_font.gif?raw=true" alt="animation"/>
