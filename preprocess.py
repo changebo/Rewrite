@@ -9,8 +9,11 @@ import sys
 import numpy as np
 import os
 from PIL import Image
+#import Image
 from PIL import ImageDraw
+#import ImageDraw
 from PIL import ImageFont
+#import ImageFont
 from utils import render_fonts_image
 
 reload(sys)
@@ -37,7 +40,7 @@ def generate_font_bitmaps(chars, font_path, char_size, canvas_size, x_offset, y_
     return np.array(bitmaps)
 
 
-def process_font(chars, font_path, save_dir, x_offset=0, y_offset=0, mode='target', char_size=32, canvas=40):
+def process_font(chars, font_path, save_dir, x_offset=0, y_offset=0, mode='target', char_size=64, canvas=70):
     # char_size = 64
     # canvas = 80
 
@@ -89,9 +92,9 @@ if __name__ == "__main__":
                         help='target font x offset')
     parser.add_argument('--ty', type=int, default=0,
                         help='target font y offset')
-    parser.add_argument('--char_size', type=int, default=32,
+    parser.add_argument('--char_size', type=int, default=64,
                         help='char_size. Default = 32')
-    parser.add_argument('--canvas', type=int, default=40,
+    parser.add_argument('--canvas', type=int, default=70,
                         help='canvas. Default = 40')
     FLAGS = parser.parse_args()
 
